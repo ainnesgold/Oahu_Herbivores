@@ -148,7 +148,7 @@ p3 <- ggplot(data=outcome, aes(x=area_patch2*100, y=CPUE, col=as.factor(fishing_
 p4 <- ggplot(data=outcome, aes(x=area_patch2*100, y=patch_1_revenue, col=as.factor(fishing_effort_patch1))) +
   geom_line(aes(size = as.factor(fishing_effort_patch1))) +
   theme_minimal() + 
-  labs(x="% Coastal Waters Closed to Fishing", y="Revenue ($)") +
+  labs(x="% Coastal Waters Closed to Fishing", y="Revenue (USD)") +
   scale_color_viridis_d(name="Fishing Effort") +
   scale_size_manual(name = "Fishing Effort", values = c(1.5, 1.4, 1.3, 1.2, 1.1, 1, 0.9, 0.8, 0.7, 0.6, 0.5)) +
   theme(legend.position="top", text = element_text(size=20))
