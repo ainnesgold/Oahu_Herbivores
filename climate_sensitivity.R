@@ -1,3 +1,6 @@
+#for some reason it throws an error if you press source to run it all, but if you run all the parameter stuff first,
+#and then run the loop, it works fine!
+
 #sensitivity analysis on temp dependent r and k models
 library(purrr)
 library(tidyverse)
