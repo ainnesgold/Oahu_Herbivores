@@ -7,7 +7,7 @@ library(purrr)
 #CLIMATE 
 source('SST_Projections.R')
 SST_dev <- projections[['anomaly']]
-mean_temps_series <- mean_temps_crop[['mean_temps']]
+mean_temps_series <- mean_temps_crop[['extracted_mean_temps']]
 
 ##Time
 timesteps <- 50

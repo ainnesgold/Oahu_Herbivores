@@ -64,7 +64,12 @@ calculate_escaped_stock_biomass <- function(population, fraction_harvested) {
 #CLIMATE 
 source('SST_Projections.R')
 SST_dev <- projections[['anomaly']]
-mean_temps_series <- mean_temps_crop[['mean_temps']]
+mean_temps_series <- mean_temps_crop[['extracted_mean_temps']]
+
+#varying the constants in temp dependent r equation
+a = seq(0.1, 0.5, by = 0.1)
+b = 0
+c = seq(-0.01, 0, by = 0.0025)
 
 ##Time
 timesteps <- 50
@@ -111,7 +116,7 @@ for (iter in 1:nrow(parameter_grid)) {
   ## Run Population Model ---------------------------------------------------------------------------------------------------------
   for(t in 2:timesteps){ # start at 2 because we set the initial starting value which is t = 1
     for(i in 1:number_patches){
-      
+    
       r_temp[t, i] <- calculate_r_temp(SST_dev[t], parameter_grid[['a']][[iter]], b, parameter_grid[['c']][[iter]])
       CC_temp[t, i] <- calculate_CC_temp(parameter_grid[['m']][[iter]], mean_temps_series[t], parameter_grid[['d']][[iter]])
       population[t, i] <- calculate_population_growth_temp_r_CC(population[t-1, i], r_temp[t, i], 
