@@ -173,7 +173,8 @@ hist_temps <- left_join(hist_mean_temps, hist_max_temps)
 hist_long <- hist_temps %>% 
   pivot_longer(cols = "hist_mean_temps":"hist_max_temps", names_to = "measure", values_to = "value")
 
-ggplot(data = hist_long, 
+ggplot(data = hist_long %>%
+         filter(years >= 1991, years <2021), 
        aes(x=years, y=value, color=measure)) +
   geom_point() + 
   geom_line() +
