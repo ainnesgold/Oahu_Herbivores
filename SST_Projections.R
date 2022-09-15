@@ -187,9 +187,22 @@ ggplot(data = hist_long %>%
 
 
 
+#growth rate plot
+quad_r <- function (x, a=0.3, b=0, c=-0.0037) {
+  a + b*x + c*x^2
+}
+#K plot
+linear_k <- function(x, m=-10.76933, b=635.5131) {
+  m*x + b
+}
 
 
+par(mfrow = c(2, 1))
 
+curve(quad_r, from = -10, to = 10, xlab="SST deviation (°C)", ylab = "")
+title(ylab= "Intrinsic growth rate", line=2, cex.lab=1.2)
 
+curve(linear_k, from = 27, to = 35, xlab = "Mean SST (°C)", ylab = "")
+title(ylab= bquote('Carrying capacity'~(g/m^2)), line=2, cex.lab=1.2)
 
-
+dev.off()
