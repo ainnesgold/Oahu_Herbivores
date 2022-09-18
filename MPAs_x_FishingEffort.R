@@ -15,7 +15,7 @@ patch_area_list <- split(patch_area_grid, 1:nrow(patch_area_grid))
 number_patches <- ncol(patch_area_grid)
 
 #fishing
-fishing_effort_sequences <- list(seq(0, 1, by = 0.1), 0)
+fishing_effort_sequences <- list(seq(0, 0, by = 0.1), 0)
 fishing_effort_grid <- do.call(expand.grid, fishing_effort_sequences)
 fishing_effort_list <- split(fishing_effort_grid, 1:nrow(fishing_effort_grid))
 

@@ -40,8 +40,10 @@ calculate_population_growth_temp_r <- function(population, r_temp, carrying_capa
 }
 
 #Climate 2: temp dependent K
-m = -10.76933
-d = 635.5131
+#m = -10.76933
+#d = 635.5131
+m=-7.234
+d=541.932
 calculate_CC_temp <- function(mean_temp_series) {
   CC_temp <- (m * mean_temp_series) + d
   return(CC_temp)

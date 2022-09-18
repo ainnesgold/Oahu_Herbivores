@@ -154,8 +154,9 @@ ggplot(data=rcp4.5 %>% filter (years > 2019, years < 2071), aes(x=years, y=extra
   theme_minimal() +
   theme(text = element_text(size=20))
 
-
-
+#get a 30 yr avg for 2040 - future
+ rcp4.5 %>% filter(years >=2025 | years <= 2055) %>%
+   summarise(mean(extracted_mean_temps))
 
 
 
@@ -192,7 +193,7 @@ quad_r <- function (x, a=0.3, b=0, c=-0.0037) {
   a + b*x + c*x^2
 }
 #K plot
-linear_k <- function(x, m=-10.76933, b=635.5131) {
+linear_k <- function(x, m=-7.234, b=541.932) {
   m*x + b
 }
 

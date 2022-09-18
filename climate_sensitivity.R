@@ -27,8 +27,8 @@ calculate_population_growth_temp_r <- function(population, r_temp, carrying_capa
   return(population)
 }
 #varying the constants in temp dependent K equation
-m <- seq(-14.7, -6.7, by = 2) #-10.76933 
-d <- seq(535, 735, by = 50) #635.5131
+m <- seq(-11.2, -3.2, by = 2) #-7.234 
+d <- seq(442, 642, by = 50) #541.932
 
 calculate_CC_temp <- function(m, mean_temp_series, d) {
   CC_temp <- (m * mean_temp_series) + d
@@ -172,8 +172,8 @@ outcome$CPUE[is.na(outcome$CPUE)] <- 0
 #it is confusing. sorry. the title of the figure matches how the constants are named in the paper, but the coded variables don't.
 
 #first constant: r (coded as "a")
-p1 <- ggplot(data=outcome%>%filter(round(c,3)==-0.005, round(m,1)==-10.7,
-                                   round(d, 1)==635), 
+p1 <- ggplot(data=outcome%>%filter(round(c,3)==-0.005, round(m,1)==-7.2,
+                                   round(d, 1)==542), 
              aes(x=area_patch2*100, y=total_pop, col=as.factor(fishing_effort_patch1))) +
   geom_line(aes(size = as.factor(fishing_effort_patch1))) +
   facet_wrap(~a) +
@@ -183,8 +183,8 @@ p1 <- ggplot(data=outcome%>%filter(round(c,3)==-0.005, round(m,1)==-10.7,
   scale_size_manual(name = "Fishing Effort", values = c(1.5, 1.4, 1.3, 1.2, 1.1, 1, 0.9, 0.8, 0.7, 0.6, 0.5)) +
   theme(legend.position="bottom", text = element_text(size=20))
 
-p2 <- ggplot(data=outcome%>%filter(round(c,3)==-0.005, round(m,1)==-10.7,
-                                   round(d, 1)==635), 
+p2 <- ggplot(data=outcome%>%filter(round(c,3)==-0.005, round(m,1)==-7.2,
+                                   round(d, 1)==542), 
              aes(x=area_patch2*100, y=patch_1_harvest, col=as.factor(fishing_effort_patch1))) +
   geom_line(aes(size = as.factor(fishing_effort_patch1))) +
   facet_wrap(~a) +
@@ -194,8 +194,8 @@ p2 <- ggplot(data=outcome%>%filter(round(c,3)==-0.005, round(m,1)==-10.7,
   scale_size_manual(name = "Fishing Effort", values = c(1.5, 1.4, 1.3, 1.2, 1.1, 1, 0.9, 0.8, 0.7, 0.6, 0.5)) +
   theme(legend.position="bottom", text = element_text(size=20))
 
-p3 <- ggplot(data=outcome%>%filter(round(c,3)==-0.005, round(m,1)==-10.7,
-                                   round(d, 1)==635), 
+p3 <- ggplot(data=outcome%>%filter(round(c,3)==-0.005, round(m,1)==-7.2,
+                                   round(d, 1)==542), 
              aes(x=area_patch2*100, y=CPUE, col=as.factor(fishing_effort_patch1))) +
   geom_line(aes(size = as.factor(fishing_effort_patch1))) +
   facet_wrap(~a) +
@@ -206,13 +206,13 @@ p3 <- ggplot(data=outcome%>%filter(round(c,3)==-0.005, round(m,1)==-10.7,
   theme(legend.position="bottom", text = element_text(size=20))
 
 plot <- ggarrange(p1 + rremove("xlab"), p2 + rremove("xlab"), p3, nrow=3, common.legend = TRUE, legend = "right")
-annotate_figure(plot, bottom = text_grob("a = -0.005, m = -10.7, b = 635.", hjust = 1, x=1, size = 10),
+annotate_figure(plot, bottom = text_grob("a = -0.005, m = -7.2, b = 542.", hjust = 1, x=1, size = 10),
                 top = textGrob("r", gp = gpar(fontsize = 20)))
 
 
 #second constant: a (coded as "c")
-p1 <- ggplot(data=outcome%>%filter(round(a,1)==0.3, round(m,1)==-10.7,
-                                   round(d, 1)==635), 
+p1 <- ggplot(data=outcome%>%filter(round(a,1)==0.3, round(m,1)==-7.2,
+                                   round(d, 1)==542), 
              aes(x=area_patch2*100, y=total_pop, col=as.factor(fishing_effort_patch1))) +
   geom_line(aes(size = as.factor(fishing_effort_patch1))) +
   facet_wrap(~c) +
@@ -222,8 +222,8 @@ p1 <- ggplot(data=outcome%>%filter(round(a,1)==0.3, round(m,1)==-10.7,
   scale_size_manual(name = "Fishing Effort", values = c(1.5, 1.4, 1.3, 1.2, 1.1, 1, 0.9, 0.8, 0.7, 0.6, 0.5)) +
   theme(legend.position="bottom", text = element_text(size=20))
 
-p2 <- ggplot(data=outcome%>%filter(round(a,1)==0.3, round(m,1)==-10.7,
-                                   round(d, 1)==635), 
+p2 <- ggplot(data=outcome%>%filter(round(a,1)==0.3, round(m,1)==-7.2,
+                                   round(d, 1)==542), 
              aes(x=area_patch2*100, y=patch_1_harvest, col=as.factor(fishing_effort_patch1))) +
   geom_line(aes(size = as.factor(fishing_effort_patch1))) +
   facet_wrap(~c) +
@@ -233,8 +233,8 @@ p2 <- ggplot(data=outcome%>%filter(round(a,1)==0.3, round(m,1)==-10.7,
   scale_size_manual(name = "Fishing Effort", values = c(1.5, 1.4, 1.3, 1.2, 1.1, 1, 0.9, 0.8, 0.7, 0.6, 0.5)) +
   theme(legend.position="bottom", text = element_text(size=20))
 
-p3 <- ggplot(data=outcome%>%filter(round(a,1)==0.3, round(m,1)==-10.7,
-                                   round(d, 1)==635), 
+p3 <- ggplot(data=outcome%>%filter(round(a,1)==0.3, round(m,1)==-7.2,
+                                   round(d, 1)==542), 
              aes(x=area_patch2*100, y=CPUE, col=as.factor(fishing_effort_patch1))) +
   geom_line(aes(size = as.factor(fishing_effort_patch1))) +
   facet_wrap(~c) +
@@ -245,13 +245,13 @@ p3 <- ggplot(data=outcome%>%filter(round(a,1)==0.3, round(m,1)==-10.7,
   theme(legend.position="bottom", text = element_text(size=20))
 
 plot <- ggarrange(p1 + rremove("xlab"), p2 + rremove("xlab"), p3, nrow=3, common.legend = TRUE, legend = "right")
-annotate_figure(plot, bottom = text_grob("r = 0.3, m = -10.7, b = 635.", hjust = 1, x=1, size = 10),
+annotate_figure(plot, bottom = text_grob("r = 0.3, m = -7.2, b = 542.", hjust = 1, x=1, size = 10),
                 top = textGrob("a", gp = gpar(fontsize = 20)))
 
 
 #third constant: m (coded as "m")
 p1 <- ggplot(data=outcome%>%filter(round(c,3)==-0.005, round(a, 1)==0.3,
-                                   round(d, 1)==635), 
+                                   round(d, 1)==542), 
              aes(x=area_patch2*100, y=total_pop, col=as.factor(fishing_effort_patch1))) +
   geom_line(aes(size = as.factor(fishing_effort_patch1))) +
   facet_wrap(~m) +
@@ -262,7 +262,7 @@ p1 <- ggplot(data=outcome%>%filter(round(c,3)==-0.005, round(a, 1)==0.3,
   theme(legend.position="bottom", text = element_text(size=20))
 
 p2 <- ggplot(data=outcome%>%filter(round(c,3)==-0.005,  round(a, 1)==0.3,
-                                   round(d, 1)==635), 
+                                   round(d, 1)==542), 
              aes(x=area_patch2*100, y=patch_1_harvest, col=as.factor(fishing_effort_patch1))) +
   geom_line(aes(size = as.factor(fishing_effort_patch1))) +
   facet_wrap(~m) +
@@ -273,7 +273,7 @@ p2 <- ggplot(data=outcome%>%filter(round(c,3)==-0.005,  round(a, 1)==0.3,
   theme(legend.position="bottom", text = element_text(size=20))
 
 p3 <- ggplot(data=outcome%>%filter(round(c,3)==-0.005,  round(a, 1)==0.3,
-                                   round(d, 1)==635), 
+                                   round(d, 1)==542), 
              aes(x=area_patch2*100, y=CPUE, col=as.factor(fishing_effort_patch1))) +
   geom_line(aes(size = as.factor(fishing_effort_patch1))) +
   facet_wrap(~m) +
@@ -284,14 +284,14 @@ p3 <- ggplot(data=outcome%>%filter(round(c,3)==-0.005,  round(a, 1)==0.3,
   theme(legend.position="bottom", text = element_text(size=20))
 
 plot <- ggarrange(p1 + rremove("xlab"), p2 + rremove("xlab"), p3, nrow=3, common.legend = TRUE, legend = "right")
-annotate_figure(plot, bottom = text_grob("r = 0.3, a = -0.005, b = 635.", hjust = 1, x=1, size = 10),
+annotate_figure(plot, bottom = text_grob("r = 0.3, a = -0.005, b = 542.", hjust = 1, x=1, size = 10),
                 top = textGrob("m", gp = gpar(fontsize = 20)))
 
 
 
 #fourth constant: b (coded as "d")
 p1 <- ggplot(data=outcome%>%filter(round(c,3)==-0.005, round(a, 1)==0.3,
-                                   round(m, 1)==-10.7), 
+                                   round(m, 1)==-7.2), 
              aes(x=area_patch2*100, y=total_pop, col=as.factor(fishing_effort_patch1))) +
   geom_line(aes(size = as.factor(fishing_effort_patch1))) +
   facet_wrap(~d) +
@@ -302,7 +302,7 @@ p1 <- ggplot(data=outcome%>%filter(round(c,3)==-0.005, round(a, 1)==0.3,
   theme(legend.position="bottom", text = element_text(size=20))
 
 p2 <- ggplot(data=outcome%>%filter(round(c,3)==-0.005,  round(a, 1)==0.3,
-                                   round(m, 1)==-10.7), 
+                                   round(m, 1)==-7.2), 
              aes(x=area_patch2*100, y=patch_1_harvest, col=as.factor(fishing_effort_patch1))) +
   geom_line(aes(size = as.factor(fishing_effort_patch1))) +
   facet_wrap(~d) +
@@ -313,7 +313,7 @@ p2 <- ggplot(data=outcome%>%filter(round(c,3)==-0.005,  round(a, 1)==0.3,
   theme(legend.position="bottom", text = element_text(size=20))
 
 p3 <- ggplot(data=outcome%>%filter(round(c,3)==-0.005,  round(a, 1)==0.3,
-                                   round(m, 1)==-10.7), 
+                                   round(m, 1)==-7.2), 
              aes(x=area_patch2*100, y=CPUE, col=as.factor(fishing_effort_patch1))) +
   geom_line(aes(size = as.factor(fishing_effort_patch1))) +
   facet_wrap(~d) +
@@ -324,7 +324,7 @@ p3 <- ggplot(data=outcome%>%filter(round(c,3)==-0.005,  round(a, 1)==0.3,
   theme(legend.position="bottom", text = element_text(size=20))
 
 plot <- ggarrange(p1 + rremove("xlab"), p2 + rremove("xlab"), p3, nrow=3, common.legend = TRUE, legend = "right")
-annotate_figure(plot, bottom = text_grob("r = 0.3, a = -0.005, m = -10.7", hjust = 1, x=1, size = 10),
+annotate_figure(plot, bottom = text_grob("r = 0.3, a = -0.005, m = -7.2", hjust = 1, x=1, size = 10),
                 top = textGrob("b", gp = gpar(fontsize = 20)))
 
 
