@@ -442,7 +442,7 @@ p1 <- ggplot(data=patch_population_compare %>% filter(Patch=="Total Biomass",
   scale_color_viridis_d(option="turbo", name="", 
                         breaks = c("No Temperature", "Temp-dependent r", "Temp-dependent K", "Temp-dependent r + K"),
                         labels = c("No Temperature", "Temp-dependent r", "Temp-dependent K", "Temp-dependent r + K")) +
-  labs(x="% Coastal Waters Closed to Fishing", y="Total Biomass (kg)") +
+  labs(x="% Coastal Waters Closed to Fishing", y="Total Fish Biomass (kg)") +
   scale_size_manual(name = "", values = c(1, 1, 1, 1)) +
   theme_minimal()+
   theme(legend.position="bottom", text = element_text(size=20), plot.title = element_text(size = 20, hjust = 0.5))+
