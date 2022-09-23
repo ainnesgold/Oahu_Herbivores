@@ -2,7 +2,7 @@
 library(purrr)
 
 ##Time
-timesteps <- 50
+timesteps <- 200
 ##Area
 patch_area_sequences <- list(seq(0, 1, by = 0.1))
 patch_area_grid <- do.call(expand.grid, patch_area_sequences)
