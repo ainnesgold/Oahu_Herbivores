@@ -1,15 +1,14 @@
 ##Time
-timesteps <- 200
+timesteps <- 100
 ##Area
-patch_area <- c(0.5, 0.5)
+patch_area <- c(0.4, 0.6)
 number_patches <- length(patch_area)
 
-fishing_effort <- c(0, 0)
+fishing_effort <- c(0.1, 0)
 catchability <- 1
 
-
 intrinsic_growth_rate <- 0.3
-carrying_capacity <- 350
+carrying_capacity <- c(350, 350)
 
 source('seafood_prices.R')
 price <- prices_sum$PricePerG_2021
@@ -39,30 +38,42 @@ source('initialize_state_vars.R')
 for(t in 2:timesteps){ # start at 2 because we set the initial starting value which is t = 1
     for(i in 1:number_patches){
       population[t, i] <- calculate_population_growth(population[t-1, i], intrinsic_growth_rate, 
-                                                      carrying_capacity)
+                                                      carrying_capacity[i])
       recruits[t, i] <- population[t, i] - population[t-1, i]
+      adults[t, i] <- population[t, i] - recruits[t, i]
     }
-    recruits_dispersal[t,] <- recruits[t,] %*% tmp2
+  #print(population[t,1] <= carrying_capacity[1])
+  #print(population[t,1] <= carrying_capacity[1] & population[t,2] <= carrying_capacity[2])
+  if (population[t,1] <= carrying_capacity[1] & population[t,2] <= carrying_capacity[2]) { 
     
+    recruits[t,] <- recruits[t,] %*% tmp2
+  }
+
     for(i in 1:number_patches){
-      population[t, i] <- population[t, i] - recruits[t, i] + recruits_dispersal[t, i]
       # harvest
       fraction_harvested[t, i] <- calculate_fraction_harvested(fishing_effort[i],
                                                                catchability)
       
-      harvest[t, i] <- calculate_fisheries_harvest(population[t, i], fraction_harvested[t, i], 
+      harvest[t, i] <- calculate_fisheries_harvest(adults[t, i], fraction_harvested[t, i], 
                                                    (patch_area[i]*5.04e+8)) 
       
       # escapement
-      escapement[t, i] <- calculate_escaped_stock_biomass(population[t, i], fraction_harvested[t, i])
+      escapement[t, i] <- calculate_escaped_stock_biomass(adults[t, i], fraction_harvested[t, i])
     }  
-    
-    # Dispersal
-    population <- escapement[,] %*% tmp1
-    #calculate market equivalent revenue
+  
+  
+  if (population[t,1] <= carrying_capacity[1] & population[t,2] <= carrying_capacity[2]) {
+    adults[t,] <- escapement[t,] %*% tmp1
+  }
+
     revenue <- (price * harvest) * value_added_ratio
+    for(i in 1:number_patches){
+      population[t, i] <- recruits[t, i] + adults[t, i]
+    }
   }  
 
+par(mfrow=c(1,2))
 plot(population[,1])
+plot(population[,2])
 
 
