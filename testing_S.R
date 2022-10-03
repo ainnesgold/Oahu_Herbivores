@@ -42,9 +42,13 @@ for(t in 2:timesteps){ # start at 2 because we set the initial starting value wh
       recruits[t, i] <- population[t, i] - population[t-1, i]
       adults[t, i] <- population[t, i] - recruits[t, i]
     }
-  #print(population[t,1] <= carrying_capacity[1])
-  #print(population[t,1] <= carrying_capacity[1] & population[t,2] <= carrying_capacity[2])
-  if (population[t,1] <= carrying_capacity[1] & population[t,2] <= carrying_capacity[2]) { 
+  
+  #looks ok when its just the first half of the if statement
+  if (population[t,1] <= carrying_capacity[1]) {
+    
+    ##NEW IF STATEMENT
+    #second half messes things up
+ #if (population[t,1] <= carrying_capacity[1] & population[t,2] <= carrying_capacity[2]) { 
     
     recruits[t,] <- recruits[t,] %*% tmp2
   }
@@ -61,8 +65,12 @@ for(t in 2:timesteps){ # start at 2 because we set the initial starting value wh
       escapement[t, i] <- calculate_escaped_stock_biomass(adults[t, i], fraction_harvested[t, i])
     }  
   
-  
-  if (population[t,1] <= carrying_capacity[1] & population[t,2] <= carrying_capacity[2]) {
+  ##NEW IF STATEMENT
+  #same as above
+  if (population[t,1] <= carrying_capacity[1]) {
+    
+  #if (population[t,1] <= carrying_capacity[1] & population[t,2] <= carrying_capacity[2]) {
+    
     adults[t,] <- escapement[t,] %*% tmp1
   }
 

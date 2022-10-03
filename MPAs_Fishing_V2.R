@@ -73,6 +73,8 @@ for (iter in 1:nrow(parameter_grid)) {
     }
     
   ######DISPERSAL######
+    
+    ##NEW IF STATEMENT
    # if (population[t,1] <= carrying_capacity[1] & population[t,2] <= carrying_capacity[2]) { #
     recruits[t,] <- recruits[t,] %*% tmp2
     #}
@@ -88,6 +90,8 @@ for (iter in 1:nrow(parameter_grid)) {
     }
     
   ######DISPERSAL######
+    
+    ##NEW IF STATEMENT
    # if (population[t,1] <= carrying_capacity[1] & population[t,2] <= carrying_capacity[2]) {
     adults[t,] <- escapement[t,] %*% tmp1
     #}
