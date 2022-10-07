@@ -1,7 +1,7 @@
 ##Time
 timesteps <- 100
 ##Area
-patch_area <- c(0.4, 0.6)
+patch_area <- c(0.1, 0.9)
 number_patches <- length(patch_area)
 
 fishing_effort <- c(0.1, 0)
