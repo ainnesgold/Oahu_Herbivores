@@ -2,7 +2,7 @@
 library(purrr)
 
 ##Time
-timesteps <- 200
+timesteps <- 50
 ##Area
 patch_area_sequences <- list(seq(0, 1, by = 0.1))
 patch_area_grid <- do.call(expand.grid, patch_area_sequences)
@@ -56,24 +56,31 @@ for (iter in 1:nrow(parameter_grid)) {
       population[t, i] <- calculate_population_growth(population[t-1, i], intrinsic_growth_rate, 
                                                       carrying_capacity)
       recruits[t, i] <- population[t, i] - population[t-1, i]
+      adults[t, i] <- population[t, i] - recruits[t, i]
     }
     recruits_dispersal[t,] <- recruits[t,] %*% tmp2
     
     for(i in 1:number_patches){
-      population[t, i] <- population[t, i] - recruits[t, i] + recruits_dispersal[t, i]
       # harvest
       fraction_harvested[t, i] <- calculate_fraction_harvested(as.numeric(parameter_grid[['fishing_effort']][[iter]])[i],
                                                                catchability)
       
-      harvest[t, i] <- calculate_fisheries_harvest(population[t, i], fraction_harvested[t, i], 
+      harvest[t, i] <- calculate_fisheries_harvest(adults[t, i], fraction_harvested[t, i], 
                                                    (as.numeric(parameter_grid[['patch_area']][[iter]])[i]*5.04e+8)) 
       
       # escapement
-      escapement[t, i] <- calculate_escaped_stock_biomass(population[t, i], fraction_harvested[t, i])
+      escapement[t, i] <- calculate_escaped_stock_biomass(adults[t, i], fraction_harvested[t, i])
     }  
     
     # Dispersal
-    population <- escapement[,] %*% tmp1
+    adults <- escapement[,] %*% tmp1
+    
+    for (i in 1:number_patches){
+      population[t, i] <- adults[t, i] + recruits_dispersal[t, i]
+      if (population[t, i] > carrying_capacity) {
+        population[t, i] == carrying_capacity
+      }
+    }
     #calculate market equivalent revenue
     revenue <- (price * harvest) * value_added_ratio
   }  

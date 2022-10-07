@@ -15,7 +15,7 @@ outcome$CPUE <- (outcome$patch_1_harvest/1000) / outcome$fishing_effort_patch1
 outcome$CPUE[is.na(outcome$CPUE)] <- 0
 
 ##S
-p1<-ggplot(data=outcome%>%filter(round(S_recruit,1)==1,
+p1<-ggplot(data=outcome%>%filter(round(S_recruit,1)==0.1,
                                  round(intrinsic_growth_rate, 1) == 0.3,
                                  carrying_capacity==350), 
            aes(x=area_patch2*100, y=total_pop, col=as.factor(fishing_effort_patch1))) +

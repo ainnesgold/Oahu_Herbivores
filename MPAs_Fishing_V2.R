@@ -91,7 +91,7 @@ for (iter in 1:nrow(parameter_grid)) {
     
   ######DISPERSAL######
     
-    ##NEW IF STATEMENT
+    ##NEW IF STATEMENT - too weird
    # if (population[t,1] <= carrying_capacity[1] & population[t,2] <= carrying_capacity[2]) {
     adults[t,] <- escapement[t,] %*% tmp1
     #}
@@ -100,16 +100,18 @@ for (iter in 1:nrow(parameter_grid)) {
     
     for (i in 1:number_patches) {
       population[t, i] <- adults[t, i] + recruits[t, i]
-     # if (population[t, i] > carrying_capacity[i]) {
-    #    population[t, i] = carrying_capacity[i]
-    #  }
+     
+      
+      #trying to manually force it to be carrying capacity - still not a flat line??
+       if (population[t, i] > carrying_capacity[i]) {
+        population[t, i] == carrying_capacity[i]
+      }
     }
   }
   
   outcome_biomass[iter, ] <- population[t, ]
   outcome_harvest[iter, ] <- harvest[t, ]
   outcome_revenue[iter, ] <- revenue[t, ]
-  
 }
 
 
