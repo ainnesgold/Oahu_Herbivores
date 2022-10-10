@@ -2,7 +2,7 @@
 library(purrr)
 
 ##Time
-timesteps <- 50
+timesteps <- 80
 ##Area
 patch_area_sequences <- list(seq(0, 1, by = 0.1))
 patch_area_grid <- do.call(expand.grid, patch_area_sequences)
@@ -16,7 +16,7 @@ fishing_effort_list <- split(fishing_effort_grid, 1:nrow(fishing_effort_grid))
 catchability <- 1
 
 intrinsic_growth_rate <- 0.3
-carrying_capacity <- 350
+carrying_capacity <- c(350, 350)
 
 source('seafood_prices.R')
 price <- prices_sum$PricePerG_2021
@@ -54,13 +54,10 @@ for (iter in 1:nrow(parameter_grid)) {
   for(t in 2:timesteps){ # start at 2 because we set the initial starting value which is t = 1
     for(i in 1:number_patches){
       population[t, i] <- calculate_population_growth(population[t-1, i], intrinsic_growth_rate, 
-                                                      carrying_capacity)
+                                                      carrying_capacity[i])
       recruits[t, i] <- population[t, i] - population[t-1, i]
       adults[t, i] <- population[t, i] - recruits[t, i]
-    }
-    recruits_dispersal[t,] <- recruits[t,] %*% tmp2
-    
-    for(i in 1:number_patches){
+      
       # harvest
       fraction_harvested[t, i] <- calculate_fraction_harvested(as.numeric(parameter_grid[['fishing_effort']][[iter]])[i],
                                                                catchability)
@@ -70,19 +67,31 @@ for (iter in 1:nrow(parameter_grid)) {
       
       # escapement
       escapement[t, i] <- calculate_escaped_stock_biomass(adults[t, i], fraction_harvested[t, i])
-    }  
-    
-    # Dispersal
-    adults <- escapement[,] %*% tmp1
-    
-    for (i in 1:number_patches){
-      population[t, i] <- adults[t, i] + recruits_dispersal[t, i]
-      if (population[t, i] > carrying_capacity) {
-        population[t, i] == carrying_capacity
-      }
+      
     }
+    recruits[t,] <- recruits[t,] %*% tmp2
+    adults <- escapement[,] %*% tmp1
+    population[t,] <- adults[t,] + recruits[t,]
+    
     #calculate market equivalent revenue
     revenue <- (price * harvest) * value_added_ratio
+    
+    if(population[t, 1] > carrying_capacity[1] & population[t, 2] > carrying_capacity[2]){
+      population[t, ] <- carrying_capacity
+    }
+    else if(population[t, 1] > carrying_capacity[1] | population[t, 2] > carrying_capacity[2]){
+      patch_above     <- which(population[t, ] > carrying_capacity) # find which patch is above K
+      patch_not_above <- which(!(population[t, ] > carrying_capacity)) # find patch not above K
+      spillover       <- population[t, patch_above] -  carrying_capacity[patch_above] # set spillover to the difference between population and K
+      
+      population[t, patch_above]     <- carrying_capacity[patch_above] # force patch above K to equal K
+      population[t, patch_not_above] <- population[t, patch_not_above] + spillover # set the other patch equal to population plus spillover
+      
+      if(population[t, patch_not_above] > carrying_capacity[patch_not_above]){ # need to check and make sure spillover to the other patch does not push the population over carrying capactiy
+        population[t, patch_not_above] <- carrying_capacity[patch_not_above] # if it does then set that patch to carrying capacity after spillover
+      }
+      
+    } 
   }  
   
   outcome_biomass[iter, ] <- population[t, ]

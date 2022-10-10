@@ -138,10 +138,10 @@ current_max_temp <- hist_max_temps %>%
 
 #create dataframe of future values only, starting at 2021. I want 50 years right now to match the model runs.
 mean_temps_crop <- mean_temps %>%
-  filter(years > 2020, years < 2071)
+  filter(years > 2020)
 
 projections <- mean_temps %>%
-  filter(years > 2020, years < 2071) %>%
+  filter(years > 2020) %>%
   summarise(anomaly = extracted_mean_temps - current_temp$avgtemp)
 
 rcp4.5<-mean_temps

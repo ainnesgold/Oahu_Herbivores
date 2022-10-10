@@ -72,7 +72,7 @@ b = 0
 c = seq(-0.01, 0, by = 0.0025)
 
 ##Time
-timesteps <- 50
+timesteps <- 80
 ##Area
 patch_area_sequences <- list(seq(0, 1, by = 0.1))
 patch_area_grid <- do.call(expand.grid, patch_area_sequences)
@@ -123,19 +123,34 @@ for (iter in 1:nrow(parameter_grid)) {
                                                                 CC_temp[t, i])
       
       recruits[t, i] <- population[t, i] - population[t-1, i]
-    }
-    recruits_dispersal[t,] <- recruits[t,] %*% tmp2
-    
-    for(i in 1:number_patches){
-      population[t, i] <- population[t, i] - recruits[t, i] + recruits_dispersal[t, i]
+      adults[t, i] <- population[t, i] - recruits[t, i]
       fraction_harvested[t, i] <- calculate_fraction_harvested(as.numeric(parameter_grid[['fishing_effort']][[iter]])[i],
                                                                catchability)
-      harvest[t, i] <- calculate_fisheries_harvest(population[t, i], fraction_harvested[t, i], 
+      harvest[t, i] <- calculate_fisheries_harvest(adults[t, i], fraction_harvested[t, i], 
                                                    (as.numeric(parameter_grid[['patch_area']][[iter]])[i]*5.04e+8)) 
-      escapement[t, i] <- calculate_escaped_stock_biomass(population[t, i], fraction_harvested[t, i])
-    }  
-    population <- escapement[,] %*% tmp1
+      escapement[t, i] <- calculate_escaped_stock_biomass(adults[t, i], fraction_harvested[t, i])
+    }
+    
+    recruits[t,] <- recruits[t,] %*% tmp2
+    adults[t,] <- escapement[t,] %*% tmp1
+    population[t,] <- recruits[t,] + adults[t,]
     revenue <- (price * harvest) * value_added_ratio
+    
+    if(population[t, 1] > CC_temp[t, 1] & population[t, 2] > CC_temp[t, 2]){
+      population[t, ] <- CC_temp[t,]
+    }
+    else if(population[t, 1] > CC_temp[t, 1] | population[t, 2] > CC_temp[t, 2]){
+      patch_above     <- which(population[t, ] > CC_temp[t,]) # find which patch is above K
+      patch_not_above <- which(!(population[t, ] > CC_temp[t,])) # find patch not above K
+      spillover       <- population[t, patch_above] -  CC_temp[t, patch_above] # set spillover to the difference between population and K
+      
+      population[t, patch_above]     <- CC_temp[t, patch_above] # force patch above K to equal K
+      population[t, patch_not_above] <- population[t, patch_not_above] + spillover # set the other patch equal to population plus spillover
+      
+      if(population[t, patch_not_above] > CC_temp[t, patch_not_above]){ # need to check and make sure spillover to the other patch does not push the population over carrying capactiy
+        population[t, patch_not_above] <- CC_temp[t, patch_not_above] # if it does then set that patch to carrying capacity after spillover
+      }
+    }
   }  
   
   outcome_biomass[iter, ] <- population[t, ]

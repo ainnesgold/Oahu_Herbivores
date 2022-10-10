@@ -15,9 +15,7 @@ outcome$CPUE <- (outcome$patch_1_harvest/1000) / outcome$fishing_effort_patch1
 outcome$CPUE[is.na(outcome$CPUE)] <- 0
 
 ##S
-p1<-ggplot(data=outcome%>%filter(round(S_recruit,1)==0.1,
-                                 round(intrinsic_growth_rate, 1) == 0.3,
-                                 carrying_capacity==350), 
+p1<-ggplot(data=outcome%>%filter(round(S_recruit,1)==0.1), 
            aes(x=area_patch2*100, y=total_pop, col=as.factor(fishing_effort_patch1))) +
   geom_line(aes(size = as.factor(fishing_effort_patch1))) +
   facet_wrap(~S) +
@@ -27,9 +25,7 @@ p1<-ggplot(data=outcome%>%filter(round(S_recruit,1)==0.1,
   scale_size_manual(name = "Fishing Effort", values = c(1.5, 1.4, 1.3, 1.2, 1.1, 1, 0.9, 0.8, 0.7, 0.6, 0.5)) +
   theme(legend.position="top", text = element_text(size=20))
 
-p2<-ggplot(data=outcome%>%filter(round(S_recruit,1)==0.1,
-                                 round(intrinsic_growth_rate, 1) == 0.3,
-                                 carrying_capacity==350), 
+p2<-ggplot(data=outcome%>%filter(round(S_recruit,1)==0.1), 
            aes(x=area_patch2*100, y=patch_1_harvest, col=as.factor(fishing_effort_patch1))) +
   geom_line(aes(size = as.factor(fishing_effort_patch1))) +
   facet_wrap(~S) +
@@ -39,9 +35,7 @@ p2<-ggplot(data=outcome%>%filter(round(S_recruit,1)==0.1,
   scale_size_manual(name = "Fishing Effort", values = c(1.5, 1.4, 1.3, 1.2, 1.1, 1, 0.9, 0.8, 0.7, 0.6, 0.5)) +
   theme(legend.position="top", text = element_text(size=20))
 
-p3<-ggplot(data=outcome%>%filter(round(S_recruit,1)==0.1,
-                                 round(intrinsic_growth_rate, 1) == 0.3,
-                                 carrying_capacity==350), 
+p3<-ggplot(data=outcome%>%filter(round(S_recruit,1)==0.1), 
            aes(x=area_patch2*100, y=CPUE, col=as.factor(fishing_effort_patch1))) +
   geom_line(aes(size = as.factor(fishing_effort_patch1))) +
   facet_wrap(~S) +
@@ -58,9 +52,7 @@ annotate_figure(plot, bottom = text_grob("S (recruit) = 0.1, r = 0.3, K = 350.",
 
 ##S recruit
 
-p1<-ggplot(data=outcome%>%filter(round(S,1)==0.7,
-                                 round(intrinsic_growth_rate, 1) == 0.3,
-                                 carrying_capacity==350), 
+p1<-ggplot(data=outcome%>%filter(round(S,1)==0.7), 
            aes(x=area_patch2*100, y=total_pop, col=as.factor(fishing_effort_patch1))) +
   geom_line(aes(size = as.factor(fishing_effort_patch1))) +
   facet_wrap(~S_recruit) +
@@ -70,9 +62,7 @@ p1<-ggplot(data=outcome%>%filter(round(S,1)==0.7,
   scale_size_manual(name = "Fishing Effort", values = c(1.5, 1.4, 1.3, 1.2, 1.1, 1, 0.9, 0.8, 0.7, 0.6, 0.5)) +
   theme(legend.position="top", text = element_text(size=20))
 
-p2<-ggplot(data=outcome%>%filter(round(S,1)==0.7,
-                                 round(intrinsic_growth_rate, 1) == 0.3,
-                                 carrying_capacity==350), 
+p2<-ggplot(data=outcome%>%filter(round(S,1)==0.7), 
            aes(x=area_patch2*100, y=patch_1_harvest, col=as.factor(fishing_effort_patch1))) +
   geom_line(aes(size = as.factor(fishing_effort_patch1))) +
   facet_wrap(~S_recruit) +
@@ -82,9 +72,7 @@ p2<-ggplot(data=outcome%>%filter(round(S,1)==0.7,
   scale_size_manual(name = "Fishing Effort", values = c(1.5, 1.4, 1.3, 1.2, 1.1, 1, 0.9, 0.8, 0.7, 0.6, 0.5)) +
   theme(legend.position="top", text = element_text(size=20))
 
-p3<-ggplot(data=outcome%>%filter(round(S,1)==0.7,
-                                 round(intrinsic_growth_rate, 1) == 0.3,
-                                 carrying_capacity==350), 
+p3<-ggplot(data=outcome%>%filter(round(S,1)==0.7), 
            aes(x=area_patch2*100, y=CPUE, col=as.factor(fishing_effort_patch1))) +
   geom_line(aes(size = as.factor(fishing_effort_patch1))) +
   facet_wrap(~S_recruit) +

@@ -10,7 +10,7 @@ SST_dev <- projections[['anomaly']]
 mean_temps_series <- mean_temps_crop[['extracted_mean_temps']]
 
 ##Time
-timesteps <- 50
+timesteps <- 80 #how many years we have SST for
 
 patch_area_sequences <- list(seq(0, 1, by = 0.1))
 patch_area_grid <- do.call(expand.grid, patch_area_sequences)
@@ -64,38 +64,36 @@ for (iter in 1:nrow(parameter_grid)) {
       population[t, i] <- calculate_population_growth(population[t-1, i], intrinsic_growth_rate, 
                                                       carrying_capacity[i])
       recruits[t, i] <- population[t, i] - population[t-1, i]
-    }
-    recruits_dispersal[t,] <- recruits[t,] %*% tmp2
-    
-    for(i in 1:number_patches){
-      population[t, i] <- population[t, i] - recruits[t, i] + recruits_dispersal[t, i]
+      adults[t, i] <- population[t, i] - recruits[t, i]
+      
       # harvest
-      # use function to calculate harvest
       fraction_harvested[t, i] <- calculate_fraction_harvested(as.numeric(parameter_grid[['fishing_effort']][[iter]])[i],
                                                                catchability)
-      # We will have to figure out a way to scale fishing effort because the negative exponential of a high number like 10000, or even
-      # just 10, gives a pretty small number. 
-      # try running this code -- this shows that at fishing effort = 0, the survival is 1
-      # x <- seq(0, 10, length.out = 100)
-      # y <- exp(-x)
-      # plot(x,y)
-      
-      harvest[t, i] <- calculate_fisheries_harvest(population[t, i], fraction_harvested[t, i], 
+      harvest[t, i] <- calculate_fisheries_harvest(adults[t, i], fraction_harvested[t, i], 
                                                    (as.numeric(parameter_grid[['patch_area']][[iter]])[i]*5.04e+8)) 
-      
-      # escapement
-      # subtract the harvest at time t and patch i from the population[t, i]
-      escapement[t, i] <- calculate_escaped_stock_biomass(population[t, i], fraction_harvested[t, i])
-    }  
-    
-    # After the above population dynamics run for a timestep, we want the fish to disperse between patches.
-    # At time t, have the dispersal function determine:
-    # 1. the number (or biomass) of fish in patch i=1 that stay in patch i=1 and the number that move to patch i=2
-    # 2. the number in patch i=2 that stay in i=2 and the number that move to i=1.
-    population <- escapement[,] %*% tmp1
-    #calculate market equivalent revenue
+      escapement[t, i] <- calculate_escaped_stock_biomass(adults[t, i], fraction_harvested[t, i])
+    }
+    recruits[t,] <- recruits[t,] %*% tmp2
+    adults[t,] <- escapement[t,] %*% tmp1
+    population[t,] <- adults[t,] + recruits[t,]
     revenue <- (price * harvest) * value_added_ratio
     # after the above population dynamics run for time t and each patch, the next timestep (t+1) will proceed using values from time t.
+    if(population[t, 1] > carrying_capacity[1] & population[t, 2] > carrying_capacity[2]){
+      population[t, ] <- carrying_capacity
+    }
+    else if(population[t, 1] > carrying_capacity[1] | population[t, 2] > carrying_capacity[2]){
+      patch_above     <- which(population[t, ] > carrying_capacity) # find which patch is above K
+      patch_not_above <- which(!(population[t, ] > carrying_capacity)) # find patch not above K
+      spillover       <- population[t, patch_above] -  carrying_capacity[patch_above] # set spillover to the difference between population and K
+      
+      population[t, patch_above]     <- carrying_capacity[patch_above] # force patch above K to equal K
+      population[t, patch_not_above] <- population[t, patch_not_above] + spillover # set the other patch equal to population plus spillover
+      
+      if(population[t, patch_not_above] > carrying_capacity[patch_not_above]){ # need to check and make sure spillover to the other patch does not push the population over carrying capactiy
+        population[t, patch_not_above] <- carrying_capacity[patch_not_above] # if it does then set that patch to carrying capacity after spillover
+      }
+      
+    } 
   }  
   
   outcome_biomass[iter, ] <- population[t, ]
@@ -137,8 +135,6 @@ outcome_biomass <- matrix(0, ncol = 2, nrow = nrow(parameter_grid))
 outcome_harvest <- matrix(0, ncol = 2, nrow = nrow(parameter_grid))
 outcome_revenue <- matrix(0, ncol = 2, nrow = nrow(parameter_grid))
 
-
-
 for (iter in 1:nrow(parameter_grid)) {
   
   tmp1 <- dispersal(as.numeric(parameter_grid[['patch_area']][[iter]]), number_patches, S)
@@ -155,38 +151,34 @@ for (iter in 1:nrow(parameter_grid)) {
       population[t, i] <- calculate_population_growth_temp_r(population[t-1, i], r_temp[t, i], 
                                                              carrying_capacity[i])
       recruits[t, i] <- population[t, i] - population[t-1, i]
-    }
-    recruits_dispersal[t,] <- recruits[t,] %*% tmp2
-    
-    for(i in 1:number_patches){
-      population[t, i] <- population[t, i] - recruits[t, i] + recruits_dispersal[t, i]
-      # harvest
-      # use function to calculate harvest
+      adults[t, i] <- population[t, i] - recruits[t, i]
       fraction_harvested[t, i] <- calculate_fraction_harvested(as.numeric(parameter_grid[['fishing_effort']][[iter]])[i],
                                                                catchability)
-      # We will have to figure out a way to scale fishing effort because the negative exponential of a high number like 10000, or even
-      # just 10, gives a pretty small number. 
-      # try running this code -- this shows that at fishing effort = 0, the survival is 1
-      # x <- seq(0, 10, length.out = 100)
-      # y <- exp(-x)
-      # plot(x,y)
-      
-      harvest[t, i] <- calculate_fisheries_harvest(population[t, i], fraction_harvested[t, i], 
+      harvest[t, i] <- calculate_fisheries_harvest(adults[t, i], fraction_harvested[t, i], 
                                                    (as.numeric(parameter_grid[['patch_area']][[iter]])[i]*5.04e+8)) 
-      
-      # escapement
-      # subtract the harvest at time t and patch i from the population[t, i]
-      escapement[t, i] <- calculate_escaped_stock_biomass(population[t, i], fraction_harvested[t, i])
-    }  
+      escapement[t, i] <- calculate_escaped_stock_biomass(adults[t, i], fraction_harvested[t, i])
+    }
     
-    # After the above population dynamics run for a timestep, we want the fish to disperse between patches.
-    # At time t, have the dispersal function determine:
-    # 1. the number (or biomass) of fish in patch i=1 that stay in patch i=1 and the number that move to patch i=2
-    # 2. the number in patch i=2 that stay in i=2 and the number that move to i=1.
-    population <- escapement[,] %*% tmp1
-    #calculate market equivalent revenue
+    recruits[t,] <- recruits[t,] %*% tmp2
+    adults <- escapement[,] %*% tmp1
+    population[t,] <- adults[t,] + recruits[t,]
     revenue <- (price * harvest) * value_added_ratio
-    # after the above population dynamics run for time t and each patch, the next timestep (t+1) will proceed using values from time t.
+    
+    if(population[t, 1] > carrying_capacity[1] & population[t, 2] > carrying_capacity[2]){
+      population[t, ] <- carrying_capacity
+    }
+    else if(population[t, 1] > carrying_capacity[1] | population[t, 2] > carrying_capacity[2]){
+      patch_above     <- which(population[t, ] > carrying_capacity) # find which patch is above K
+      patch_not_above <- which(!(population[t, ] > carrying_capacity)) # find patch not above K
+      spillover       <- population[t, patch_above] -  carrying_capacity[patch_above] # set spillover to the difference between population and K
+      
+      population[t, patch_above]     <- carrying_capacity[patch_above] # force patch above K to equal K
+      population[t, patch_not_above] <- population[t, patch_not_above] + spillover # set the other patch equal to population plus spillover
+      
+      if(population[t, patch_not_above] > carrying_capacity[patch_not_above]){ # need to check and make sure spillover to the other patch does not push the population over carrying capactiy
+        population[t, patch_not_above] <- carrying_capacity[patch_not_above] # if it does then set that patch to carrying capacity after spillover
+      }
+    }
   }  
   
   outcome_biomass[iter, ] <- population[t, ]
@@ -230,7 +222,7 @@ outcome_harvest <- matrix(0, ncol = 2, nrow = nrow(parameter_grid))
 outcome_revenue <- matrix(0, ncol = 2, nrow = nrow(parameter_grid))
 
 
-
+##################
 for (iter in 1:nrow(parameter_grid)) {
   
   tmp1 <- dispersal(as.numeric(parameter_grid[['patch_area']][[iter]]), number_patches, S)
@@ -247,44 +239,43 @@ for (iter in 1:nrow(parameter_grid)) {
       population[t, i] <- calculate_population_growth_temp_CC(population[t-1, i], intrinsic_growth_rate, 
                                                               CC_temp[t, i])
       recruits[t, i] <- population[t, i] - population[t-1, i]
-    }
-    recruits_dispersal[t,] <- recruits[t,] %*% tmp2
-    
-    for(i in 1:number_patches){
-      population[t, i] <- population[t, i] - recruits[t, i] + recruits_dispersal[t, i]
-      # harvest
-      # use function to calculate harvest
+      adults[t, i] <- population[t, i] - recruits[t, i]
       fraction_harvested[t, i] <- calculate_fraction_harvested(as.numeric(parameter_grid[['fishing_effort']][[iter]])[i],
                                                                catchability)
-      # We will have to figure out a way to scale fishing effort because the negative exponential of a high number like 10000, or even
-      # just 10, gives a pretty small number. 
-      # try running this code -- this shows that at fishing effort = 0, the survival is 1
-      # x <- seq(0, 10, length.out = 100)
-      # y <- exp(-x)
-      # plot(x,y)
-      
-      harvest[t, i] <- calculate_fisheries_harvest(population[t, i], fraction_harvested[t, i], 
+      harvest[t, i] <- calculate_fisheries_harvest(adults[t, i], fraction_harvested[t, i], 
                                                    (as.numeric(parameter_grid[['patch_area']][[iter]])[i]*5.04e+8)) 
-      
-      # escapement
-      # subtract the harvest at time t and patch i from the population[t, i]
-      escapement[t, i] <- calculate_escaped_stock_biomass(population[t, i], fraction_harvested[t, i])
-    }  
+      escapement[t, i] <- calculate_escaped_stock_biomass(adults[t, i], fraction_harvested[t, i])
+    }
     
-    # After the above population dynamics run for a timestep, we want the fish to disperse between patches.
-    # At time t, have the dispersal function determine:
-    # 1. the number (or biomass) of fish in patch i=1 that stay in patch i=1 and the number that move to patch i=2
-    # 2. the number in patch i=2 that stay in i=2 and the number that move to i=1.
-    population <- escapement[,] %*% tmp1
-    #calculate market equivalent revenue
+    recruits[t,] <- recruits[t,] %*% tmp2
+    adults <- escapement[,] %*% tmp1
+    population[t,] <- adults[t,] + recruits[t,]
     revenue <- (price * harvest) * value_added_ratio
-    # after the above population dynamics run for time t and each patch, the next timestep (t+1) will proceed using values from time t.
+    
+    if(population[t, 1] > CC_temp[t, 1] & population[t, 2] > CC_temp[t, 2]){
+      population[t, ] <- CC_temp[t,]
+    }
+    else if(population[t, 1] > CC_temp[t, 1] | population[t, 2] > CC_temp[t, 2]){
+      patch_above     <- which(population[t, ] > CC_temp[t,]) # find which patch is above K
+      patch_not_above <- which(!(population[t, ] > CC_temp[t,])) # find patch not above K
+      spillover       <- population[t, patch_above] -  CC_temp[t, patch_above] # set spillover to the difference between population and K
+      
+      population[t, patch_above]     <- CC_temp[t, patch_above] # force patch above K to equal K
+      population[t, patch_not_above] <- population[t, patch_not_above] + spillover # set the other patch equal to population plus spillover
+      
+      if(population[t, patch_not_above] > CC_temp[t, patch_not_above]){ # need to check and make sure spillover to the other patch does not push the population over carrying capactiy
+        population[t, patch_not_above] <- CC_temp[t, patch_not_above] # if it does then set that patch to carrying capacity after spillover
+      }
+    }
   }  
   
   outcome_biomass[iter, ] <- population[t, ]
   outcome_harvest[iter, ] <- harvest[t, ]
   outcome_revenue[iter, ] <- revenue[t, ]
 }
+
+
+
 
 ##
 colnames(outcome_biomass) <- c("patch_1_population", "patch_2_population")
@@ -319,7 +310,7 @@ outcome_harvest <- matrix(0, ncol = 2, nrow = nrow(parameter_grid))
 outcome_revenue <- matrix(0, ncol = 2, nrow = nrow(parameter_grid))
 
 
-
+##################
 for (iter in 1:nrow(parameter_grid)) {
   
   tmp1 <- dispersal(as.numeric(parameter_grid[['patch_area']][[iter]]), number_patches, S)
@@ -337,44 +328,41 @@ for (iter in 1:nrow(parameter_grid)) {
       population[t, i] <- calculate_population_growth_temp_r_CC(population[t-1, i], r_temp[t, i], 
                                                                 CC_temp[t, i])
       recruits[t, i] <- population[t, i] - population[t-1, i]
-    }
-    recruits_dispersal[t,] <- recruits[t,] %*% tmp2
-    
-    for(i in 1:number_patches){
-      population[t, i] <- population[t, i] - recruits[t, i] + recruits_dispersal[t, i]
-      # harvest
-      # use function to calculate harvest
+      adults[t, i] <- population[t, i] - recruits[t, i]
       fraction_harvested[t, i] <- calculate_fraction_harvested(as.numeric(parameter_grid[['fishing_effort']][[iter]])[i],
                                                                catchability)
-      # We will have to figure out a way to scale fishing effort because the negative exponential of a high number like 10000, or even
-      # just 10, gives a pretty small number. 
-      # try running this code -- this shows that at fishing effort = 0, the survival is 1
-      # x <- seq(0, 10, length.out = 100)
-      # y <- exp(-x)
-      # plot(x,y)
-      
-      harvest[t, i] <- calculate_fisheries_harvest(population[t, i], fraction_harvested[t, i], 
+      harvest[t, i] <- calculate_fisheries_harvest(adults[t, i], fraction_harvested[t, i], 
                                                    (as.numeric(parameter_grid[['patch_area']][[iter]])[i]*5.04e+8)) 
-      
-      # escapement
-      # subtract the harvest at time t and patch i from the population[t, i]
-      escapement[t, i] <- calculate_escaped_stock_biomass(population[t, i], fraction_harvested[t, i])
-    }  
+      escapement[t, i] <- calculate_escaped_stock_biomass(adults[t, i], fraction_harvested[t, i])
+    }
     
-    # After the above population dynamics run for a timestep, we want the fish to disperse between patches.
-    # At time t, have the dispersal function determine:
-    # 1. the number (or biomass) of fish in patch i=1 that stay in patch i=1 and the number that move to patch i=2
-    # 2. the number in patch i=2 that stay in i=2 and the number that move to i=1.
-    population <- escapement[,] %*% tmp1
-    #calculate market equivalent revenue
+    recruits[t,] <- recruits[t,] %*% tmp2
+    adults <- escapement[,] %*% tmp1
+    population[t,] <- adults[t,] + recruits[t,]
     revenue <- (price * harvest) * value_added_ratio
-    # after the above population dynamics run for time t and each patch, the next timestep (t+1) will proceed using values from time t.
+    
+    if(population[t, 1] > CC_temp[t, 1] & population[t, 2] > CC_temp[t, 2]){
+      population[t, ] <- CC_temp[t,]
+    }
+    else if(population[t, 1] > CC_temp[t, 1] | population[t, 2] > CC_temp[t, 2]){
+      patch_above     <- which(population[t, ] > CC_temp[t,]) # find which patch is above K
+      patch_not_above <- which(!(population[t, ] > CC_temp[t,])) # find patch not above K
+      spillover       <- population[t, patch_above] -  CC_temp[t, patch_above] # set spillover to the difference between population and K
+      
+      population[t, patch_above]     <- CC_temp[t, patch_above] # force patch above K to equal K
+      population[t, patch_not_above] <- population[t, patch_not_above] + spillover # set the other patch equal to population plus spillover
+      
+      if(population[t, patch_not_above] > CC_temp[t, patch_not_above]){ # need to check and make sure spillover to the other patch does not push the population over carrying capactiy
+        population[t, patch_not_above] <- CC_temp[t, patch_not_above] # if it does then set that patch to carrying capacity after spillover
+      }
+    }
   }  
   
   outcome_biomass[iter, ] <- population[t, ]
   outcome_harvest[iter, ] <- harvest[t, ]
   outcome_revenue[iter, ] <- revenue[t, ]
 }
+
 
 ##
 colnames(outcome_biomass) <- c("patch_1_population", "patch_2_population")
